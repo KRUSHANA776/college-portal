@@ -159,11 +159,12 @@ app.all('*', (req, res, next) => {
 // ───── Global Error Handler ─────
 app.use(globalErrorHandler);
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-    logger.info(`Server running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+        logger.info(`Server running on port ${PORT}`);
+    });
+}
 
 // Handle uncaught exceptions and rejections
 process.on('uncaughtException', err => {
