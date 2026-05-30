@@ -79,15 +79,16 @@ app.use((req, res, next) => {
 });
 
 // ───── MongoDB Connection ─────
-mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-    .then(() => {
-        logger.info('MongoDB connected successfully');
-        initializeData();
-    })
-    .catch((err) => logger.error('MongoDB connection failed', err));
+if (process.env.NODE_ENV !== 'test') {
+    mongoose.connect(process.env.MONGODB_URI)
+        .then(() => {
+            logger.info('MongoDB connected successfully');
+            initializeData();
+        })
+        .catch((err) => {
+            logger.error('MongoDB connection failed', err);
+        });
+}
 
 // ───── Initialize sample data ─────
 async function initializeData() {
