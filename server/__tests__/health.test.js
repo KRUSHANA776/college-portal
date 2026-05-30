@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 
 describe('API Health Check', () => {
   afterAll(async () => {
-    await mongoose.connection.close();
+    await mongoose.disconnect();
   });
 
   it('should return 200 OK and status message on /api/health', async () => {
