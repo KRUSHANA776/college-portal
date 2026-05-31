@@ -169,7 +169,7 @@ function LandingPage({ user }) {
                         <div className="card staff-card">
                             <h4 className="staff-title">Asst. Teacher</h4>
                             <ul className="staff-list">
-                                <li>Shri Dhansing Khatrya Vasuke</li>
+                                <li>Shri Dhansing Khatrya Vasave</li>
                                 <li>Education: MA BED</li>
                             </ul>
                         </div>
