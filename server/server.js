@@ -5,7 +5,6 @@ const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 const mongoSanitize = require('express-mongo-sanitize');
-const xss = require('xss-clean');
 require('dotenv').config();
 
 const logger = require('./utils/logger');
@@ -73,26 +72,43 @@ app.use(cookieParser()); // Add cookie parser
 // Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
 
-// Data sanitization against XSS
-app.use(xss());
-
 // ───── Request Logging ─────
 app.use((req, res, next) => {
     logger.info(`${req.method} ${req.originalUrl}`);
     next();
 });
 
-// ───── MongoDB Connection ─────
-if (process.env.NODE_ENV !== 'test') {
-    mongoose.connect(process.env.MONGODB_URI)
-        .then(() => {
-            logger.info('MongoDB connected successfully');
-            initializeData();
-        })
-        .catch((err) => {
-            logger.error('MongoDB connection failed', err);
-        });
+// ───── MongoDB Connection (cached for Vercel serverless) ─────
+let isConnected = false;
+
+async function connectDB() {
+    if (isConnected && mongoose.connection.readyState === 1) return;
+    try {
+        await mongoose.connect(process.env.MONGODB_URI);
+        isConnected = true;
+        logger.info('MongoDB connected successfully');
+        await initializeData();
+    } catch (err) {
+        logger.error('MongoDB connection failed', err);
+        throw err;
+    }
 }
+
+// Connect eagerly (non-blocking) so it's ready for first request
+if (process.env.NODE_ENV !== 'test') {
+    connectDB().catch(err => logger.error('Initial DB connect error', err));
+}
+
+// Middleware to ensure DB is connected before handling requests
+app.use(async (req, res, next) => {
+    if (process.env.NODE_ENV === 'test') return next();
+    try {
+        await connectDB();
+        next();
+    } catch (err) {
+        res.status(503).json({ status: 'error', message: 'Database unavailable' });
+    }
+});
 
 // ───── Initialize sample data ─────
 async function initializeData() {
@@ -164,22 +180,21 @@ app.all('*', (req, res, next) => {
 // ───── Global Error Handler ─────
 app.use(globalErrorHandler);
 
-if (process.env.NODE_ENV !== 'test') {
+// Only start HTTP server when running locally (not on Vercel serverless)
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
         logger.info(`Server running on port ${PORT}`);
     });
 }
 
-// Handle uncaught exceptions and rejections
+// Log uncaught errors without crashing the serverless function
 process.on('uncaughtException', err => {
-    logger.error('UNCAUGHT EXCEPTION! 💥 Shutting down...', err);
-    process.exit(1);
+    logger.error('UNCAUGHT EXCEPTION!', err);
 });
 
 process.on('unhandledRejection', err => {
-    logger.error('UNHANDLED REJECTION! 💥 Shutting down...', err);
-    process.exit(1);
+    logger.error('UNHANDLED REJECTION!', err);
 });
 
 module.exports = app;
