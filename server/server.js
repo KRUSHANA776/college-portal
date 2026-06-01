@@ -159,17 +159,23 @@ async function initializeData() {
 }
 
 // ───── Routes ─────
+// Mount with /api prefix (standard)
 app.use('/api/students', require('./routes/students'));
 app.use('/api/faculty', require('./routes/faculty'));
 app.use('/api/notices', require('./routes/notices'));
 app.use('/api/otp', require('./routes/otp'));
 
+// Mount WITHOUT /api prefix (fallback: when VITE_API_URL is set without /api on Vercel)
+app.use('/students', require('./routes/students'));
+app.use('/faculty', require('./routes/faculty'));
+app.use('/notices', require('./routes/notices'));
+app.use('/otp', require('./routes/otp'));
+
 app.get('/api/health', (req, res) => {
-    res.json({
-        status: 'OK',
-        message: 'Prof. BSS Jr College API is running',
-        timestamp: new Date().toISOString()
-    });
+    res.json({ status: 'OK', message: 'Prof. BSS Jr College API is running', timestamp: new Date().toISOString() });
+});
+app.get('/health', (req, res) => {
+    res.json({ status: 'OK', message: 'Prof. BSS Jr College API is running', timestamp: new Date().toISOString() });
 });
 
 // Handle unhandled routes
