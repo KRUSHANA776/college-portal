@@ -1,9 +1,11 @@
 import axios from 'axios';
 
+const PRODUCTION_API = 'https://college-portal-server-alpha.vercel.app/api';
+
 const API_URL = import.meta.env.VITE_API_URL || 
   (typeof window !== 'undefined' && window.location.hostname === 'localhost' 
     ? 'http://localhost:5000/api' 
-    : '/api');
+    : PRODUCTION_API);
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
