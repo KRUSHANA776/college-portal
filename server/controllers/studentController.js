@@ -14,8 +14,8 @@ const sendTokenResponse = (student, statusCode, res) => {
     const cookieOptions = {
         expires: new Date(Date.now() + 15 * 60 * 1000), // 15 mins
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict'
+        secure: true, // Always true — required for sameSite:'none'
+        sameSite: 'none' // Cross-domain: client and server are on different Vercel domains
     };
 
     res.cookie('accessToken', accessToken, cookieOptions);
