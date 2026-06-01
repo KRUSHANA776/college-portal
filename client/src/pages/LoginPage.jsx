@@ -171,8 +171,9 @@ function LoginPage({ setUser }) {
                         {isRegister && (
                             <>
                                 <div className="form-group">
-                                    <label>FULL NAME</label>
+                                    <label htmlFor="name">FULL NAME</label>
                                     <input
+                                        id="name"
                                         type="text"
                                         name="name"
                                         placeholder="Enter your full name"
@@ -183,8 +184,9 @@ function LoginPage({ setUser }) {
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label>EMAIL ADDRESS</label>
+                                    <label htmlFor="email">EMAIL ADDRESS</label>
                                     <input
+                                        id="email"
                                         type="email"
                                         name="email"
                                         placeholder="example@college.edu"
@@ -195,8 +197,9 @@ function LoginPage({ setUser }) {
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label>STREAM</label>
+                                    <label htmlFor="stream">STREAM</label>
                                     <select
+                                        id="stream"
                                         name="stream"
                                         value={formData.stream}
                                         onChange={handleChange}
@@ -212,8 +215,9 @@ function LoginPage({ setUser }) {
                         )}
 
                         <div className="form-group">
-                            <label>{isRegister ? 'ROLL NO / STUDENT ID' : (role === 'teacher' ? 'USERNAME' : 'USER ID / ROLL NO')}</label>
+                            <label htmlFor="id">{isRegister ? 'ROLL NO / STUDENT ID' : (role === 'teacher' ? 'USERNAME' : 'USER ID / ROLL NO')}</label>
                             <input
+                                id="id"
                                 type="text"
                                 name="id"
                                 placeholder={role === 'teacher' ? 'e.g. admin' : 'e.g. S101'}
@@ -225,8 +229,9 @@ function LoginPage({ setUser }) {
                         </div>
 
                         <div className="form-group">
-                            <label>PASSWORD</label>
+                            <label htmlFor="password">PASSWORD</label>
                             <input
+                                id="password"
                                 type="password"
                                 name="password"
                                 placeholder="Enter password"
@@ -239,8 +244,9 @@ function LoginPage({ setUser }) {
 
                         {isRegister && (
                             <div className="form-group">
-                                <label>CONFIRM PASSWORD</label>
+                                <label htmlFor="confirmPassword">CONFIRM PASSWORD</label>
                                 <input
+                                    id="confirmPassword"
                                     type="password"
                                     name="confirmPassword"
                                     placeholder="Confirm password"
@@ -254,9 +260,10 @@ function LoginPage({ setUser }) {
 
                         {isRegister && (
                             <div className="form-group">
-                                <label>EMAIL VERIFICATION (OTP)</label>
+                                <label htmlFor="otp">EMAIL VERIFICATION (OTP)</label>
                                 <div style={{ display: 'flex', gap: '10px' }}>
                                     <input
+                                        id="otp"
                                         type="text"
                                         name="otp"
                                         placeholder="Enter 6-digit OTP"
