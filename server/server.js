@@ -43,7 +43,7 @@ app.use((req, res, next) => {
 });
 
 // ───── CORS — explicit allowlist ─────
-const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
+const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173,https://bssaindane.vercel.app')
     .split(',')
     .map(o => o.trim());
 
