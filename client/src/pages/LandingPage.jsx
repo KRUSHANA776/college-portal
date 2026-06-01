@@ -231,7 +231,7 @@ function LandingPage({ user }) {
                         </div>
                         <p className="footer-text">Inspiring minds, shaping futures since 1999.</p>
                     </div>
-                    <div>
+                    <div> 
                         <h4>Contact Us</h4>
                         <p className="footer-text">📍 Molgi, Tal.Akkalkuwa, Dist.Nandurbar</p>
                         <p className="footer-text">📧 Email: <a href="mailto:[EMAIL_ADDRESS]" style={{ color: 'white' }}>lpbscolmolgi1999@gmail.com</a></p>
