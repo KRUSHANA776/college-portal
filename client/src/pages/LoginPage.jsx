@@ -37,9 +37,9 @@ function LoginPage({ setUser }) {
             const user = sessionStorage.getItem('user');
             if (user) {
                 const userData = JSON.parse(user);
-                if (userData.role === 'teacher') {
+                if (userData.role === 'teacher' || userData.role === 'admin') {
                     navigate('/teacher-dashboard', { replace: true });
-                } else {
+                } else if (userData.role === 'student') {
                     navigate('/student-dashboard', { replace: true });
                 }
             }
@@ -120,13 +120,15 @@ function LoginPage({ setUser }) {
                 }
             }
 
+            // Fix: use explicit conditional to avoid operator precedence bug
+            const rawUser = response.data.student ?? response.data.faculty ?? {};
             const userData = {
-                ...response.data.student || response.data.faculty,
+                ...rawUser,
                 role: response.data.role
             };
 
+            // setUser handles sessionStorage internally via authStore
             setUser(userData);
-            sessionStorage.setItem('user', JSON.stringify(userData));
 
             // Clear form after success
             setFormData({
