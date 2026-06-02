@@ -7,19 +7,15 @@ const { validateSendOtp, validateVerifyOtp } = require('../middleware/validate')
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 
-// Configure nodemailer with pooling to keep connections warm and reduce SMTP handshake delays
+// Configure nodemailer. Note: connection pooling is disabled to avoid stale/frozen sockets in serverless environments (Vercel).
 const transporter = nodemailer.createTransport({
-    pool: true,
     host: 'smtp.gmail.com',
     port: 465,
     secure: true,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
-    },
-    maxConnections: 5,
-    maxMessages: 100,
-    rateLimit: 5 // max 5 messages per second
+    }
 });
 
 // Send OTP (rate limited strictly)
@@ -52,11 +48,14 @@ router.post('/send-otp', authLimiter, validateSendOtp, catchAsync(async (req, re
         process.env.EMAIL_PASS !== 'your_gmail_app_password';
 
     if (hasRealCredentials) {
-        // Send email in the background asynchronously so the client doesn't wait for SMTP handshakes
-        transporter.sendMail(mailOptions).catch(err => {
+        // Must await the email sending so that serverless functions (like Vercel) do not freeze/terminate the execution before the SMTP process completes
+        try {
+            await transporter.sendMail(mailOptions);
+            res.json({ message: 'OTP sent successfully' });
+        } catch (err) {
             console.error('Nodemailer failed to send OTP email to:', normalizedEmail, err);
-        });
-        res.json({ message: 'OTP sent successfully' });
+            return next(new AppError('Failed to send verification email. Please try again.', 500));
+        }
     } else {
         // No real email configured
         console.log('Email not configured. OTP generated for:', normalizedEmail);
