@@ -255,23 +255,33 @@
 }
 
 @media print {
-    body * {
-        visibility: hidden;
+    /* Hide the non-print elements completely from layout */
+    .header,
+    .student-dashboard > .container {
+        display: none !important;
     }
 
-    .bonafide-print,
-    .bonafide-print * {
-        visibility: visible;
+    /* Make sure the page body and root containers are styled for printing */
+    html, body, #root, .App, .student-dashboard {
+        background: #ffffff !important;
+        color: #000000 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        box-shadow: none !important;
     }
 
+    /* Render the printable component */
     .bonafide-print {
-        display: block;
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        border: 15px double var(--brand-primary);
-        padding: 50px;
+        display: block !important;
+        position: relative !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 40px !important;
+        border: 15px double #0f172a !important;
+        background: #ffffff !important;
+        box-sizing: border-box !important;
     }
 
     .bonafide-header {

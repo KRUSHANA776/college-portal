@@ -7,11 +7,24 @@ function StudentDashboard({ user: initialUser }) {
     const [user, setUser] = useState(initialUser);
     const [notices, setNotices] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [showBonafide, setShowBonafide] = useState(false);
+    const [activePrintType, setActivePrintType] = useState(null);
 
-    const [showReportCard, setShowReportCard] = useState(false);
-    const [showAttendanceCert, setShowAttendanceCert] = useState(false);
+    useEffect(() => {
+        const handlePrintCleanup = () => {
+            // Keep it mounted briefly after returning to the window, then cleanup
+            setTimeout(() => {
+                setActivePrintType(null);
+            }, 1000);
+        };
 
+        window.addEventListener('focus', handlePrintCleanup);
+        window.addEventListener('afterprint', handlePrintCleanup);
+
+        return () => {
+            window.removeEventListener('focus', handlePrintCleanup);
+            window.removeEventListener('afterprint', handlePrintCleanup);
+        };
+    }, []);
 
     useEffect(() => {
         if (initialUser) {
@@ -40,27 +53,24 @@ function StudentDashboard({ user: initialUser }) {
     }, [initialUser?.id]);
 
     const handlePrintBonafide = () => {
-        setShowBonafide(true);
+        setActivePrintType('bonafide');
         setTimeout(() => {
             window.print();
-            setShowBonafide(false);
-        }, 100);
+        }, 300);
     };
 
     const handlePrintReportCard = () => {
-        setShowReportCard(true);
+        setActivePrintType('report-card');
         setTimeout(() => {
             window.print();
-            setShowReportCard(false);
-        }, 100);
+        }, 300);
     };
 
     const handlePrintAttendanceCert = () => {
-        setShowAttendanceCert(true);
+        setActivePrintType('attendance');
         setTimeout(() => {
             window.print();
-            setShowAttendanceCert(false);
-        }, 100);
+        }, 300);
     };
 
 
@@ -250,7 +260,7 @@ function StudentDashboard({ user: initialUser }) {
             </div>
 
             {/* Bonafide Certificate for Printing */}
-            {showBonafide && (
+            {activePrintType === 'bonafide' && (
                 <div className="bonafide-print">
                     <div className="bonafide-header">
                         <img src="/logo.png" alt="College Logo" className="print-logo" />
@@ -276,7 +286,7 @@ function StudentDashboard({ user: initialUser }) {
             )}
 
             {/* Report Card for Printing */}
-            {showReportCard && (
+            {activePrintType === 'report-card' && (
                 <div className="bonafide-print"> {/* Reusing print class for simplicity */}
                     <div className="bonafide-header">
                         <img src="/logo.png" alt="College Logo" className="print-logo" />
@@ -341,7 +351,7 @@ function StudentDashboard({ user: initialUser }) {
             )}
 
             {/* Attendance Certificate for Printing */}
-            {showAttendanceCert && (
+            {activePrintType === 'attendance' && (
                 <div className="bonafide-print">
                     <div className="bonafide-header">
                         <img src="/logo.png" alt="College Logo" className="print-logo" />
