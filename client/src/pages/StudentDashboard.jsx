@@ -7,26 +7,10 @@ function StudentDashboard({ user: initialUser }) {
     const [user, setUser] = useState(initialUser);
     const [notices, setNotices] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [activePrintType, setActivePrintType] = useState(null);
+    const [activePreview, setActivePreview] = useState(null); // 'bonafide' | 'report' | 'attendance' | null
 
-    useEffect(() => {
-        const handlePrintCleanup = () => {
-            // Keep it mounted briefly after returning to the window, then cleanup
-            setTimeout(() => {
-                setActivePrintType(null);
-            }, 1000);
-        };
 
-        window.addEventListener('focus', handlePrintCleanup);
-        window.addEventListener('afterprint', handlePrintCleanup);
-
-        return () => {
-            window.removeEventListener('focus', handlePrintCleanup);
-            window.removeEventListener('afterprint', handlePrintCleanup);
-        };
-    }, []);
-
-    useEffect(() => {
+    useEffect(() => { 
         if (initialUser) {
             setUser(initialUser);
         }
@@ -53,24 +37,19 @@ function StudentDashboard({ user: initialUser }) {
     }, [initialUser?.id]);
 
     const handlePrintBonafide = () => {
-        setActivePrintType('bonafide');
-        setTimeout(() => {
-            window.print();
-        }, 300);
+        setActivePreview('bonafide');
     };
 
     const handlePrintReportCard = () => {
-        setActivePrintType('report-card');
-        setTimeout(() => {
-            window.print();
-        }, 300);
+        setActivePreview('report');
     };
 
     const handlePrintAttendanceCert = () => {
-        setActivePrintType('attendance');
-        setTimeout(() => {
-            window.print();
-        }, 300);
+        setActivePreview('attendance');
+    };
+
+    const handleDownloadPrint = () => {
+        window.print();
     };
 
 
@@ -259,124 +238,143 @@ function StudentDashboard({ user: initialUser }) {
                 </div>
             </div>
 
-            {/* Bonafide Certificate for Printing */}
-            {activePrintType === 'bonafide' && (
-                <div className="bonafide-print">
-                    <div className="bonafide-header">
-                        <img src="/logo.png" alt="College Logo" className="print-logo" />
-                        <p>Gram Vikas Mandal's Molgi</p>
-                        <h2>Late Prof.B.S.Saindane Art &amp; Sci Jr. College Molgi Tal, Akkalkuwa Dist. Nandurbar </h2>
-                    </div>
-                    <div className="bonafide-content">
-                        <p>Date: {new Date().toLocaleDateString()}</p>
-                        <h2>BONAFIDE CERTIFICATE</h2>
-                        <p>
-                            This is to certify Mr./Miss. <strong>{user.name}</strong>  studing in the class of <strong>{user.standard || '12th'} {user.stream} </strong> 
-                            is a bonafide student of this college.His/Her date of birth according to the School-general Register is _________________________ 
-                        </p>
-                        <p>
-                            He/She Bears a Good moral character to the best of our knowledge and belif.
-                        </p>
-                    </div>
-                    <div className="bonafide-footer">
-                        <p>_________________________</p>
-                        <p><strong>Principal</strong></p>
-                    </div>
-                </div>
-            )}
+            {/* Document Preview & Download Modal */}
+            {activePreview && (
+                <div className="preview-modal-overlay" onClick={() => setActivePreview(null)}>
+                    <div className="preview-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="preview-modal-header">
+                            <h2>
+                                {activePreview === 'bonafide' && 'Bonafide Certificate Preview'}
+                                {activePreview === 'report' && 'Report Card Preview'}
+                                {activePreview === 'attendance' && 'Attendance Certificate Preview'}
+                            </h2>
+                            <button className="close-btn" onClick={() => setActivePreview(null)} aria-label="Close Preview">
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div className="preview-modal-body">
+                            {activePreview === 'bonafide' && (
+                                <div className="bonafide-print">
+                                    <div className="bonafide-header">
+                                        <img src="/logo.png" alt="College Logo" className="print-logo" />
+                                        <p>Gram Vikas Mandal's Molgi</p>
+                                        <h2>Late Prof.B.S.Saindane Art &amp; Sci Jr. College Molgi Tal, Akkalkuwa Dist. Nandurbar </h2>
+                                    </div>
+                                    <div className="bonafide-content">
+                                        <p className="doc-date">Date: {new Date().toLocaleDateString()}</p>
+                                        <h2 className="doc-title">BONAFIDE CERTIFICATE</h2>
+                                        <p className="doc-text">
+                                            This is to certify Mr./Miss. <strong>{user.name}</strong> studying in the class of <strong>{user.standard || '12th'} {user.stream}</strong> is a bonafide student of this college. His/Her date of birth according to the School-general Register is _________________________.
+                                        </p>
+                                        <p className="doc-text">
+                                            He/She Bears a Good moral character to the best of our knowledge and belief.
+                                        </p>
+                                    </div>
+                                    <div className="bonafide-footer">
+                                        <p>_________________________</p>
+                                        <p><strong>Principal</strong></p>
+                                    </div>
+                                </div>
+                            )}
 
-            {/* Report Card for Printing */}
-            {activePrintType === 'report-card' && (
-                <div className="bonafide-print"> {/* Reusing print class for simplicity */}
-                    <div className="bonafide-header">
-                        <img src="/logo.png" alt="College Logo" className="print-logo" />
-                        <p>Gram Vikas Mandal's Molgi</p>
-                        <h2>Late Prof.B.S.Saindane Art &amp; Sci Jr. College Molgi Tal, Akkalkuwa Dist. Nandurbar </h2>
-                        {user.batch || '2026-27'} 
-                    </div> 
-                    <div className="bonafide-content" style={{ textAlign: 'left' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', borderBottom: '1px solid #000', paddingBottom: '10px' }}>
-                            <div>
-                                <p><strong>Student Name:</strong> {user.name}</p>
-                                <p><strong>Roll No:</strong> {user.id}</p>
-                            </div>
-                            <div style={{ textAlign: 'right' }}>
-                                <p><strong>Standard:</strong> {user.standard || '12th'}</p>
-                                <p><strong>Stream:</strong> {user.stream}</p>
-                            </div>
-                        </div>
+                            {activePreview === 'report' && (
+                                <div className="bonafide-print">
+                                    <div className="bonafide-header">
+                                        <img src="/logo.png" alt="College Logo" className="print-logo" />
+                                        <p>Gram Vikas Mandal's Molgi</p>
+                                        <h2>Late Prof.B.S.Saindane Art &amp; Sci Jr. College Molgi Tal, Akkalkuwa Dist. Nandurbar </h2>
+                                        <p style={{ margin: '5px 0 0 0', fontWeight: 'bold' }}>{user.batch || '2026-27'}</p>
+                                    </div> 
+                                    <div className="bonafide-content" style={{ textAlign: 'left' }}>
+                                        <div className="student-details-grid">
+                                            <div>
+                                                <p><strong>Student Name:</strong> {user.name}</p>
+                                                <p><strong>Roll No:</strong> {user.id}</p>
+                                            </div>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <p><strong>Standard:</strong> {user.standard || '12th'}</p>
+                                                <p><strong>Stream:</strong> {user.stream}</p>
+                                            </div>
+                                        </div>
 
-                        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
-                            <thead>
-                                <tr style={{ background: '#eee' }}>
-                                    <th style={{ border: '1px solid #000', padding: '10px' }}>Subject</th>
-                                    <th style={{ border: '1px solid #000', padding: '10px' }}>Max Marks</th>
-                                    <th style={{ border: '1px solid #000', padding: '10px' }}>Obtained</th>
-                                    <th style={{ border: '1px solid #000', padding: '10px' }}>Grade</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {marksArray.map((mark, index) => (
-                                    <tr key={index}>
-                                        <td style={{ border: '1px solid #000', padding: '10px' }}>{mark.subject}</td>
-                                        <td style={{ border: '1px solid #000', padding: '10px' }}>100</td>
-                                        <td style={{ border: '1px solid #000', padding: '10px' }}>{mark.score}</td>
-                                        <td style={{ border: '1px solid #000', padding: '10px' }}>
-                                            {mark.score >= 90 ? 'O' : mark.score >= 80 ? 'A+' : mark.score >= 70 ? 'A' : mark.score >= 60 ? 'B+' : mark.score >= 50 ? 'B' : mark.score >= 40 ? 'C' : mark.score >= 35 ? 'D' : 'F'}
-                                        </td>
-                                    </tr>
-                                ))}
-                                <tr style={{ fontWeight: 'bold', background: '#f9f9f9' }}>
-                                    <td style={{ border: '1px solid #000', padding: '10px' }}>TOTAL</td>
-                                    <td style={{ border: '1px solid #000', padding: '10px' }}>{maxMarks}</td>
-                                    <td style={{ border: '1px solid #000', padding: '10px' }}>{totalMarks}</td>
-                                    <td style={{ border: '1px solid #000', padding: '10px' }}>
-                                        {percentage}% ({percentage >= 35 ? 'PASS' : 'FAIL'})
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div className="bonafide-footer" style={{ marginTop: '100px', display: 'flex', justifyContent: 'space-between', padding: '0 50px' }}>
-                        <div style={{ textAlign: 'left' }}>
-                            <p>_________________________</p>
-                            <p><strong>Class Teacher</strong></p>
-                        </div>
-                        <div style={{ textAlign: 'right' }}>
-                            <p>_________________________</p>
-                            <p><strong>Principal</strong></p>
-                        </div>
-                    </div>
-                </div>
-            )}
+                                        <table className="report-marks-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Subject</th>
+                                                    <th>Max Marks</th>
+                                                    <th>Obtained</th>
+                                                    <th>Grade</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {marksArray.map((mark, index) => (
+                                                    <tr key={index}>
+                                                        <td>{mark.subject}</td>
+                                                        <td>100</td>
+                                                        <td>{mark.score}</td>
+                                                        <td>
+                                                            {mark.score >= 90 ? 'O' : mark.score >= 80 ? 'A+' : mark.score >= 70 ? 'A' : mark.score >= 60 ? 'B+' : mark.score >= 50 ? 'B' : mark.score >= 40 ? 'C' : mark.score >= 35 ? 'D' : 'F'}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                                <tr className="total-row">
+                                                    <td>TOTAL</td>
+                                                    <td>{maxMarks}</td>
+                                                    <td>{totalMarks}</td>
+                                                    <td>
+                                                        {percentage}% ({percentage >= 35 ? 'PASS' : 'FAIL'})
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div className="document-footer-split">
+                                        <div>
+                                            <p>_________________________</p>
+                                            <p><strong>Class Teacher</strong></p>
+                                        </div>
+                                        <div>
+                                            <p>_________________________</p>
+                                            <p><strong>Principal</strong></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
-            {/* Attendance Certificate for Printing */}
-            {activePrintType === 'attendance' && (
-                <div className="bonafide-print">
-                    <div className="bonafide-header">
-                        <img src="/logo.png" alt="College Logo" className="print-logo" />
-                        <p>Gram Vikas Mandal's Molgi</p>
-                        <h2>Late Prof.B.S.Saindane Art &amp; Sci Jr. College Molgi Tal, Akkalkuwa Dist. Nandurbar </h2>
-                    </div>
-                    <div className="bonafide-content" style={{ textAlign: 'center' }}>
-                        <p style={{ textAlign: 'right' }}>Date: {new Date().toLocaleDateString()}</p>
-                        <h2 style={{ margin: '40px 0', fontSize: '2.2rem', color: '#1e293b', textTransform: 'uppercase', letterSpacing: '2px' }}>
-                            Certificate of Attendance
-                        </h2>
-                        <div style={{ margin: '40px 0', fontSize: '1.3rem', lineHeight: '2' }}>
-                            <p>This is to certify that {user.name} Enrollment No:  {user.id} 
-                                of <strong> {user.standard || '12th'} {user.stream}</strong> has maintained a record of
-                                <strong > {user.attendance}%</strong> Attendance during the academic session <strong>{user.batch || '2025-26'}</strong>.</p>
+                            {activePreview === 'attendance' && (
+                                <div className="bonafide-print">
+                                    <div className="bonafide-header">
+                                        <img src="/logo.png" alt="College Logo" className="print-logo" />
+                                        <p>Gram Vikas Mandal's Molgi</p>
+                                        <h2>Late Prof.B.S.Saindane Art &amp; Sci Jr. College Molgi Tal, Akkalkuwa Dist. Nandurbar </h2>
+                                    </div>
+                                    <div className="bonafide-content" style={{ textAlign: 'center' }}>
+                                        <p className="doc-date">Date: {new Date().toLocaleDateString()}</p>
+                                        <h2 className="doc-title-attendance">Certificate of Attendance</h2>
+                                        <div className="attendance-body">
+                                            <p>This is to certify that <strong>{user.name}</strong> Enrollment No: <strong>{user.id}</strong> of <strong>{user.standard || '12th'} {user.stream}</strong> has maintained a record of <strong>{user.attendance}%</strong> Attendance during the academic session <strong>{user.batch || '2025-26'}</strong>.</p>
+                                        </div>
+                                    </div>
+                                    <div className="document-footer-split">
+                                        <div>
+                                            <p>_________________________</p>
+                                            <p><strong>Class Teacher</strong></p>
+                                        </div>
+                                        <div>
+                                            <p>_________________________</p>
+                                            <p><strong>Principal</strong></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                    </div>
-                    <div className="bonafide-footer" style={{ marginTop: '50px', display: 'flex', justifyContent: 'space-between', padding: '0 20px' }}>
-                        <div style={{ textAlign: 'left' }}>
-                            <p>_________________________</p>
-                            <p><strong>Class Teacher</strong></p>
-                        </div>
-                        <div style={{ textAlign: 'right' }}>
-                            <p>_________________________</p>
-                            <p><strong>Principal</strong></p>
+                        <div className="preview-modal-footer">
+                            <button className="btn btn-outline" onClick={() => setActivePreview(null)}>
+                                Close Preview
+                            </button>
+                            <button className="btn btn-primary" onClick={handleDownloadPrint}>
+                                <i className="fas fa-print"></i> Print / Download PDF
+                            </button>
                         </div>
                     </div>
                 </div>
